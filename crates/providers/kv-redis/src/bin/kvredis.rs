@@ -336,7 +336,6 @@ mod test {
     use wasmcloud_provider_wit_bindgen::deps::serde_json;
 
     use super::{get_redis_url, KvRedisConfig};
-    use crate::serde_json;
 
     const PROPER_URL: &str = "redis://127.0.0.1:6379";
 

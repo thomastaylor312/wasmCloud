@@ -2374,7 +2374,7 @@ fn extract_witified_map(input: &[TokenTree]) -> Option<TokenStream> {
             // since this branch is only meant to a list of tuples (Vec<Vec<(....)>>)
             //
             // If the inner tokens are a group then we should head to the final case branch instead
-            && inner.get(0).is_some_and(|tokens| !matches!(tokens, TokenTree::Group { .. })) => {
+            && inner.first().is_some_and(|tokens| !matches!(tokens, TokenTree::Group { .. })) => {
             let container_ts = container.to_token_stream();
             // Recursive call to extract the witified map from the inner type, re-wrapping in the container
             extract_witified_map(inner)

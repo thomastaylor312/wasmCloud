@@ -47,7 +47,8 @@ pub async fn start_vault(
             .context("failed to build vault client settings")?,
     )
     .context("failed to build vault client")?;
-    let vault_client = timeout(Duration::from_secs(3), async move {
+    // NOTE(thomastaylor312): Vault takes a while to start up sometimes, so we need to wait for it to be ready
+    let vault_client = timeout(Duration::from_secs(10), async move {
         loop {
             if let Ok(ServerStatus::OK) = vault_client.status().await {
                 return vault_client;
