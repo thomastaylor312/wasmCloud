@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use wash_lib::cli::stop::{handle_stop_actor, stop_host, stop_provider, StopCommand};
+use wash_lib::cli::stop::{stop_host, stop_provider, StopCommand};
 use wash_lib::cli::{CommandOutput, OutputKind};
 
 use crate::appearance::spinner::Spinner;
@@ -11,11 +11,6 @@ pub async fn handle_command(
 ) -> Result<CommandOutput> {
     let sp: Spinner = Spinner::new(&output_kind)?;
     let out: CommandOutput = match command {
-        StopCommand::Actor(cmd) => {
-            let actor_id = &cmd.actor_id.to_string();
-            sp.update_spinner_message(format!(" Stopping actor {actor_id} ... "));
-            handle_stop_actor(cmd).await?
-        }
         StopCommand::Provider(cmd) => {
             let provider_id = &cmd.provider_id.to_string();
             sp.update_spinner_message(format!(" Stopping provider {provider_id} ... "));
@@ -37,7 +32,7 @@ mod test {
 
     use super::*;
     use clap::Parser;
-    use wash_lib::cli::stop::{StopActorCommand, StopHostCommand, StopProviderCommand};
+    use wash_lib::cli::stop::{StopHostCommand, StopProviderCommand};
 
     #[derive(Parser)]
     struct Cmd {
@@ -49,7 +44,6 @@ mod test {
     const CTL_PORT: &str = "4222";
     const DEFAULT_LATTICE: &str = "default";
 
-    const ACTOR_ID: &str = "MDPDJEYIAK6MACO67PRFGOSSLODBISK4SCEYDY3HEOY4P5CVJN6UCWUK";
     const HOST_ID: &str = "NCE7YHGI42RWEKBRDJZWXBEJJCFNE5YIWYMSTLGHQBEGFY55BKJ3EG3G";
     const PROVIDER_ID: &str = "VBKTSBG2WKP6RJWLQ5O7RDVIIB4LMW6U5R67A7QMIDBZDGZWYTUE3TSI";
     const CONTRACT_ID: &str = "wasmcloud:httpserver";
@@ -61,59 +55,6 @@ mod test {
     const TIMEOUT_MS: u64 = 2001;
     const HOST_TIMEOUT_MS: u64 = 3001;
     const LINK_NAME: &str = "default";
-
-    #[test]
-    /// Enumerates multiple options of the `stop actor` subcommand to ensure API doesn't
-    /// change between versions. This test will fail if the subcommand
-    /// changes syntax, ordering of required elements, or flags.
-    fn test_stop_actor_cmd_comprehensive() -> Result<()> {
-        let stop_actor_all: Cmd = Parser::try_parse_from([
-            "ctl",
-            "stop",
-            "actor",
-            "--host-id",
-            HOST_ID,
-            ACTOR_ID,
-            "--lattice",
-            DEFAULT_LATTICE,
-            "--ctl-host",
-            CTL_HOST,
-            "--ctl-port",
-            CTL_PORT,
-            "--ctl-jwt",
-            CTL_JWT,
-            "--ctl-seed",
-            CTL_SEED,
-            "--ctl-credsfile",
-            CTL_CREDSFILE,
-            "--timeout-ms",
-            &TIMEOUT_MS.to_string(),
-            "--context",
-            CONTEXT_PATH,
-            "--js-domain",
-            JS_DOMAIN,
-            "--skip-wait",
-        ])?;
-
-        match stop_actor_all.command {
-            CtlCliCommand::Stop(StopCommand::Actor(StopActorCommand {
-                opts,
-                host_id,
-                actor_id,
-                skip_wait,
-            })) => {
-                assert_eq!(&opts.ctl_host.unwrap(), CTL_HOST);
-                assert_eq!(&opts.ctl_port.unwrap(), CTL_PORT);
-                assert_eq!(&opts.lattice.unwrap(), DEFAULT_LATTICE);
-                assert!(skip_wait);
-                assert_eq!(host_id.unwrap(), HOST_ID);
-                assert_eq!(actor_id.to_string(), ACTOR_ID);
-            }
-            cmd => panic!("stop actor constructed incorrect command {cmd:?}"),
-        }
-
-        Ok(())
-    }
 
     #[test]
     /// Enumerates multiple options of the `stop actor` subcommand to ensure API doesn't

@@ -17,7 +17,7 @@ async fn integration_call() -> Result<()> {
 
     // Start an echo actor
     let StartCommandOutput { actor_id, .. } = instance
-        .start_actor(ECHO_OCI_REF)
+        .scale_actor(ECHO_OCI_REF, 1)
         .await
         .context("failed to start actor")?;
     let actor_id = actor_id.context("actor ID not present after starting actor")?;

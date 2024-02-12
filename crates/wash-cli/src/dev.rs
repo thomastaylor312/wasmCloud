@@ -9,9 +9,10 @@ use notify::{event::EventKind, Event as NotifyEvent, RecursiveMode, Watcher};
 use tokio::task::JoinHandle;
 use tokio::time::{timeout, Duration};
 use tokio::{select, sync::mpsc};
+use wash_lib::actor::ScaleActorArgs;
 use wash_lib::generate::emoji;
 use wash_lib::{
-    actor::{scale_actor, start_actor, StartActorArgs},
+    actor::scale_actor,
     build::{build_project, SignConfig},
     cli::dev::run_dev_loop,
     cli::CommandOutput,
@@ -269,7 +270,6 @@ pub async fn handle_command(
 
     // Since we're using the actor from file on disk, the ref should be the file path (canonicalized) on disk as URI
     let actor_ref = format!("file://{}", artifact_path.display());
-    let actor_id;
 
     // Attempt to find or create the actor, scaling any existing actors to zero if it exists
     let inventory = ctl_client.get_host_inventory(&host.id).await.or_else(|e| {
@@ -278,27 +278,35 @@ pub async fn handle_command(
             &host.id
         )
     })?;
-    if let Some(existing_actor) = inventory
+    if inventory
         .actors
         .into_iter()
-        .find(|a| a.image_ref == Some(actor_ref.clone()))
+        .any(|a| a.image_ref == Some(actor_ref.clone()))
     {
-        actor_id = existing_actor.id;
-        scale_actor(&ctl_client, &host.id, &actor_ref, 1, None).await?;
-    } else {
-        // Start the actor for the first time
-        actor_id = start_actor(StartActorArgs {
+        scale_actor(ScaleActorArgs {
             ctl_client: &ctl_client,
             host_id: &host.id,
             actor_ref: &actor_ref,
-            count: 1,
-            skip_wait: false,
+            count: 0,
+            annotations: None,
+            skip_wait: true,
             timeout_ms: None,
         })
-        .await?
-        .actor_id
-        .ok_or_else(|| anyhow!("failed to do thing"))?;
+        .await?;
     }
+    // Scale the actor up
+    let actor_id = scale_actor(ScaleActorArgs {
+        ctl_client: &ctl_client,
+        host_id: &host.id,
+        actor_ref: &actor_ref,
+        count: 1,
+        annotations: None,
+        skip_wait: true,
+        timeout_ms: None,
+    })
+    .await?
+    .actor_id
+    .ok_or_else(|| anyhow!("failed to start actor"))?;
 
     // Set up a oneshot channel to remove
     let (stop_tx, mut stop_rx) = mpsc::channel::<()>(1);

@@ -7,7 +7,7 @@ use wash_lib::cli::{
     link::LinkCommand,
     scale::{handle_scale_actor, ScaleCommand},
     start::StartCommand,
-    stop::{handle_stop_actor, stop_host, stop_provider, StopCommand},
+    stop::{stop_host, stop_provider, StopCommand},
     update::{handle_update_actor, UpdateCommand},
     CommandOutput, OutputKind,
 };
@@ -91,11 +91,6 @@ pub async fn handle_command(
             eprintln!("[warn] `wash ctl start` has been deprecated in favor of `wash start` and will be removed in a future version.");
             handle_start_command(cmd, output_kind).await?
         }
-        Stop(StopCommand::Actor(cmd)) => {
-            eprintln!("[warn] `wash ctl stop` has been deprecated in favor of `wash stop` and will be removed in a future version.");
-            sp.update_spinner_message(format!(" Stopping actor {} ... ", cmd.actor_id));
-            handle_stop_actor(cmd.clone()).await?
-        }
         Stop(StopCommand::Provider(cmd)) => {
             eprintln!("[warn] `wash ctl stop` has been deprecated in favor of `wash stop` and will be removed in a future version.");
             sp.update_spinner_message(format!(" Stopping provider {} ... ", cmd.provider_id));
@@ -137,9 +132,7 @@ mod test {
     use clap::Parser;
 
     use wash_lib::cli::{
-        get::GetHostsCommand,
-        scale::ScaleActorCommand,
-        stop::{StopActorCommand, StopProviderCommand},
+        get::GetHostsCommand, scale::ScaleActorCommand, stop::StopProviderCommand,
         update::UpdateActorCommand,
     };
 
@@ -165,49 +158,6 @@ mod test {
     /// change between versions. This test will fail if any subcommand of `wash ctl`
     /// changes syntax, ordering of required elements, or flags.
     fn test_ctl_comprehensive() -> Result<()> {
-        let stop_actor_all: Cmd = Parser::try_parse_from([
-            "ctl",
-            "stop",
-            "actor",
-            "--lattice",
-            DEFAULT_LATTICE,
-            "--ctl-host",
-            CTL_HOST,
-            "--ctl-port",
-            CTL_PORT,
-            "--timeout-ms",
-            "2001",
-            "--host-id",
-            HOST_ID,
-            ACTOR_ID,
-        ])?;
-        match stop_actor_all.command {
-            CtlCliCommand::Stop(StopCommand::Actor(StopActorCommand {
-                opts,
-                host_id,
-                actor_id,
-                skip_wait,
-            })) => {
-                assert_eq!(&opts.ctl_host.unwrap(), CTL_HOST);
-                assert_eq!(&opts.ctl_port.unwrap(), CTL_PORT);
-                assert_eq!(&opts.lattice.unwrap(), DEFAULT_LATTICE);
-                assert_eq!(opts.timeout_ms, 2001);
-                assert_eq!(host_id, Some(HOST_ID.to_string()));
-                assert_eq!(actor_id, ACTOR_ID);
-                assert!(!skip_wait);
-            }
-            cmd => panic!("ctl stop actor constructed incorrect command {cmd:?}"),
-        }
-        let stop_actor_minimal: Cmd = Parser::try_parse_from(["ctl", "stop", "actor", "foobar"])?;
-        match stop_actor_minimal.command {
-            CtlCliCommand::Stop(StopCommand::Actor(StopActorCommand {
-                host_id, actor_id, ..
-            })) => {
-                assert_eq!(host_id, None);
-                assert_eq!(actor_id, "foobar");
-            }
-            cmd => panic!("ctl stop actor constructed incorrect command {cmd:?}"),
-        }
         let stop_provider_all: Cmd = Parser::try_parse_from([
             "ctl",
             "stop",
@@ -432,6 +382,10 @@ mod test {
             "1",
             "--annotations",
             "foo=bar",
+            "--constraints",
+            "foo=bar",
+            "--auction-timeout-ms",
+            "1000",
         ])?;
 
         match scale_actor_all.command {
@@ -441,6 +395,9 @@ mod test {
                 actor_ref,
                 max_instances,
                 annotations,
+                constraints,
+                auction_timeout_ms,
+                ..
             })) => {
                 assert_eq!(&opts.ctl_host.unwrap(), CTL_HOST);
                 assert_eq!(&opts.ctl_port.unwrap(), CTL_PORT);
@@ -449,7 +406,9 @@ mod test {
                 assert_eq!(host_id, HOST_ID);
                 assert_eq!(actor_ref, "wasmcloud.azurecr.io/actor:v2".to_string());
                 assert_eq!(max_instances, 1);
-                assert_eq!(annotations, vec!["foo=bar".to_string()]);
+                assert_eq!(annotations.unwrap(), vec!["foo=bar".to_string()]);
+                assert_eq!(constraints.unwrap(), vec!["foo=bar".to_string()]);
+                assert_eq!(auction_timeout_ms, 1000);
             }
             cmd => panic!("ctl scale actor constructed incorrect command {cmd:?}"),
         }

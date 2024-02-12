@@ -16,15 +16,13 @@ async fn integration_stop_actor_serial() -> Result<()> {
     let wash_instance = TestWashInstance::create().await?;
 
     let StartCommandOutput {
-        actor_id,
         actor_ref,
         host_id,
         success,
         ..
-    } = wash_instance.start_actor(ECHO_OCI_REF).await?;
+    } = wash_instance.scale_actor(ECHO_OCI_REF, 1).await?;
     assert!(success, "start command returned success");
 
-    let actor_id = actor_id.expect("missing actor_id from start command output");
     let actor_ref = actor_ref.expect("missing actor_ref from start command output");
     assert_eq!(actor_ref, ECHO_OCI_REF, "actor ref matches");
 
@@ -32,7 +30,7 @@ async fn integration_stop_actor_serial() -> Result<()> {
     assert_eq!(host_id, wash_instance.host_id, "host_id matches");
 
     // Stop the actor
-    wash_instance.stop_actor(&actor_id, Some(host_id)).await?;
+    wash_instance.scale_actor(ECHO_OCI_REF, 0).await?;
 
     Ok(())
 }

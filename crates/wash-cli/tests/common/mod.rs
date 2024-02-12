@@ -287,12 +287,17 @@ impl TestWashInstance {
         })
     }
 
-    /// Trigger the equivalent of `wash start actor` on a [`TestWashInstance`]
-    pub(crate) async fn start_actor(&self, oci_ref: impl AsRef<str>) -> Result<StartCommandOutput> {
+    /// Trigger the equivalent of `wash scale actor` on a [`TestWashInstance`]
+    pub(crate) async fn scale_actor(
+        &self,
+        oci_ref: impl AsRef<str>,
+        max_instances: u32,
+    ) -> Result<StartCommandOutput> {
         let output = Command::new(env!("CARGO_BIN_EXE_wash"))
             .args([
-                "start",
+                "scale",
                 "actor",
+                &self.host_id,
                 oci_ref.as_ref(),
                 "--output",
                 "json",
@@ -300,13 +305,15 @@ impl TestWashInstance {
                 DEFAULT_WASH_INVOCATION_TIMEOUT_MS_ARG,
                 "--ctl-port",
                 &self.nats_port.to_string(),
+                "--max-instances",
+                &(max_instances.to_string()),
             ])
             .kill_on_drop(true)
             .output()
             .await
             .context("failed to start actor")?;
         serde_json::from_slice(&output.stdout)
-            .context("failed to parse output of `wash start actor`")
+            .context("failed to parse output of `wash scale actor`")
     }
 
     /// Trigger the equivalent of `wash start provider` on a [`TestWashInstance`]
@@ -384,43 +391,6 @@ impl TestWashInstance {
         ensure!(output.status.success(), "wash call invocation failed");
         serde_json::from_slice(&output.stdout)
             .context("failed to parse output of `wash call` output")
-    }
-
-    /// Trigger the equivalent of `wash stop actor` on a [`TestWashInstance`]
-    pub(crate) async fn stop_actor(
-        &self,
-        actor_id: impl AsRef<str>,
-        host_id: Option<String>,
-    ) -> Result<StopCommandOutput> {
-        // Build dynamic arg list to feed to `wash stop actor`
-        let mut args: Vec<String> = [
-            "stop",
-            "actor",
-            actor_id.as_ref(),
-            "--output",
-            "json",
-            "--timeout-ms",
-            DEFAULT_WASH_INVOCATION_TIMEOUT_MS_ARG,
-            "--ctl-port",
-            self.nats_port.to_string().as_ref(),
-        ]
-        .iter()
-        .map(ToString::to_string)
-        .collect();
-        // Add --host-id to args if specified
-        // Add host name to argument list if provided
-        if let Some(host_id) = host_id {
-            args.extend(["--host-id".into(), host_id]);
-        }
-
-        let output = Command::new(env!("CARGO_BIN_EXE_wash"))
-            .args(&args)
-            .kill_on_drop(true)
-            .output()
-            .await
-            .context("failed to stop actor")?;
-        serde_json::from_slice(&output.stdout)
-            .context("failed to parse output of `wash stop actor`")
     }
 
     /// Trigger the equivalent of `wash stop provider` on a [`TestWashInstance`]
