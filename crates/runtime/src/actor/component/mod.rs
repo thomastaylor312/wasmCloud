@@ -15,7 +15,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::Mutex;
 use tracing::{error, instrument, trace};
 use wascap::jwt;
-use wasmtime::component::{Linker, ResourceTable, ResourceTableError, Val};
+use wasmtime::component::{InstancePre, Linker, ResourceTable, ResourceTableError, Val};
 use wasmtime_wasi::preview2::command::{self, Command};
 use wasmtime_wasi::preview2::pipe::{
     AsyncReadStream, AsyncWriteStream, ClosedInputStream, ClosedOutputStream,
@@ -232,11 +232,10 @@ impl Debug for Ctx {
 /// Pre-compiled actor [Component], which is cheapily-[Cloneable](Clone)
 #[derive(Clone)]
 pub struct Component {
-    component: wasmtime::component::Component,
     engine: wasmtime::Engine,
-    linker: Linker<Ctx>,
     claims: Option<jwt::Claims<jwt::Actor>>,
     handler: builtin::HandlerBuilder,
+    instance_pre: wasmtime::component::InstancePre<Ctx>,
 }
 
 impl Debug for Component {
@@ -491,10 +490,9 @@ fn wasifill(
 
 #[instrument(level = "trace", skip_all)]
 fn instantiate(
-    component: wasmtime::component::Component,
     engine: &wasmtime::Engine,
-    linker: Linker<Ctx>,
     handler: impl Into<builtin::Handler>,
+    instance_pre: InstancePre<Ctx>,
 ) -> anyhow::Result<Instance> {
     let stdin = StdioStream::default();
     let stdout = StdioStream::default();
@@ -519,9 +517,8 @@ fn instantiate(
     };
     let store = wasmtime::Store::new(engine, ctx);
     Ok(Instance {
-        component,
-        linker,
         store,
+        instance_pre,
     })
 }
 
@@ -557,13 +554,13 @@ impl Component {
         command::add_to_linker(&mut linker).context("failed to link core WASI interfaces")?;
 
         wasifill(&component, &resolve, world, &mut linker);
+        let instance_pre = linker.instantiate_pre(&component)?;
 
         Ok(Self {
-            component,
             engine,
-            linker,
             claims,
             handler: rt.handler.clone(),
+            instance_pre,
         })
     }
 
@@ -584,7 +581,7 @@ impl Component {
     pub fn into_instance_claims(
         self,
     ) -> anyhow::Result<(Instance, Option<jwt::Claims<jwt::Actor>>)> {
-        let instance = instantiate(self.component, &self.engine, self.linker, self.handler)?;
+        let instance = instantiate(&self.engine, self.handler, self.instance_pre)?;
         Ok((instance, self.claims))
     }
 
@@ -592,10 +589,9 @@ impl Component {
     #[instrument]
     pub fn instantiate(&self) -> anyhow::Result<Instance> {
         instantiate(
-            self.component.clone(),
             &self.engine,
-            self.linker.clone(),
             self.handler.clone(),
+            self.instance_pre.clone(),
         )
     }
 
@@ -622,9 +618,8 @@ impl From<Component> for Option<jwt::Claims<jwt::Actor>> {
 
 /// An instance of a [Component]
 pub struct Instance {
-    component: wasmtime::component::Component,
-    linker: wasmtime::component::Linker<Ctx>,
     store: wasmtime::Store<Ctx>,
+    instance_pre: InstancePre<Ctx>,
 }
 
 impl Debug for Instance {
@@ -671,19 +666,15 @@ impl Instance {
     /// Instantiates and returns [`GuestBindings`] if exported by the [`Instance`].
     async fn as_guest_bindings(&mut self) -> anyhow::Result<GuestBindings> {
         // Attempt to instantiate using guest bindings
-        let guest_err = match guest_bindings::Guest::instantiate_async(
-            &mut self.store,
-            &self.component,
-            &self.linker,
-        )
-        .await
-        {
-            Ok((bindings, _)) => return Ok(GuestBindings::Interface(bindings)),
-            Err(e) => e,
-        };
+        let guest_err =
+            match guest_bindings::Guest::instantiate_pre(&mut self.store, &self.instance_pre).await
+            {
+                Ok((bindings, _)) => return Ok(GuestBindings::Interface(bindings)),
+                Err(e) => e,
+            };
 
         // Attempt to instantiate using only bindings available in command
-        match Command::instantiate_async(&mut self.store, &self.component, &self.linker).await {
+        match Command::instantiate_pre(&mut self.store, &self.instance_pre).await {
             Ok((bindings, _)) => Ok(GuestBindings::Command(bindings)),
             // If neither of the above instantiations worked, the instance cannot be run
             Err(command_err) => bail!(

@@ -119,10 +119,9 @@ impl Instance {
         mut self,
     ) -> anyhow::Result<InterfaceInstance<incoming_http_bindings::IncomingHttp>> {
         let bindings = if let Ok((bindings, _)) =
-            incoming_http_bindings::IncomingHttp::instantiate_async(
+            incoming_http_bindings::IncomingHttp::instantiate_pre(
                 &mut self.store,
-                &self.component,
-                &self.linker,
+                &self.instance_pre,
             )
             .await
         {
