@@ -1,5 +1,6 @@
 mod event;
 mod handler;
+mod links;
 
 pub mod config;
 /// wasmCloud host configuration
@@ -30,6 +31,7 @@ use cloudevents::{EventBuilder, EventBuilderV10};
 use futures::future::Either;
 use futures::stream::{select_all, AbortHandle, Abortable, SelectAll};
 use futures::{join, stream, try_join, Stream, StreamExt, TryFutureExt, TryStreamExt};
+use links::Links;
 use nkeys::{KeyPair, KeyPairType};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -470,7 +472,7 @@ pub struct Host {
     stop_rx: watch::Receiver<Option<Instant>>,
     queue: AbortHandle,
     // Component ID -> All Links
-    links: RwLock<HashMap<String, Vec<InterfaceLinkDefinition>>>,
+    links: RwLock<HashMap<String, Links>>,
     component_claims: Arc<RwLock<HashMap<ComponentId, jwt::Claims<jwt::Component>>>>, // TODO: use a single map once Claims is an enum
     provider_claims: Arc<RwLock<HashMap<String, jwt::Claims<jwt::CapabilityProvider>>>>,
     metrics: Arc<HostMetrics>,
@@ -2237,28 +2239,29 @@ impl Host {
 
             // Prepare startup links by generating the source and target configs. Note that because the provider may be the source
             // or target of a link, we need to iterate over all links to find the ones that involve the provider.
-            let link_definitions = stream::iter(self.links.read().await.values().flatten())
-                .filter_map(|link| async {
-                    if link.source_id == provider_id || link.target == provider_id {
-                        if let Ok(provider_link) =
-                            resolve_link_config(&config_generator, link.clone()).await
-                        {
-                            Some(provider_link)
+            let link_definitions =
+                stream::iter(self.links.read().await.values().flat_map(|v| v.iter()))
+                    .filter_map(|link| async {
+                        if link.source_id == provider_id || link.target == provider_id {
+                            if let Ok(provider_link) =
+                                resolve_link_config(&config_generator, link.clone()).await
+                            {
+                                Some(provider_link)
+                            } else {
+                                error!(
+                                    provider_id,
+                                    source_id = link.source_id,
+                                    target = link.target,
+                                    "failed to resolve link config, skipping link"
+                                );
+                                None
+                            }
                         } else {
-                            error!(
-                                provider_id,
-                                source_id = link.source_id,
-                                target = link.target,
-                                "failed to resolve link config, skipping link"
-                            );
                             None
                         }
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<wasmcloud_core::InterfaceLinkDefinition>>()
-                .await;
+                    })
+                    .collect::<Vec<wasmcloud_core::InterfaceLinkDefinition>>()
+                    .await;
 
             let host_data = HostData {
                 host_id: self.host_key.public_key(),
@@ -2542,7 +2545,7 @@ impl Host {
         trace!("handling links");
 
         let links = self.links.read().await;
-        let links: Vec<&InterfaceLinkDefinition> = links.values().flatten().collect();
+        let links: Vec<&InterfaceLinkDefinition> = links.values().flat_map(|v| v.iter()).collect();
         let res =
             serde_json::to_vec(&CtlResponse::ok(links)).context("failed to serialize response")?;
         Ok(res)
@@ -3181,14 +3184,20 @@ impl Host {
         let spec: ComponentSpecification = serde_json::from_slice(value.as_ref())
             .context("failed to deserialize component specification")?;
 
+        let import_links = component_import_links(&spec.links);
+        // Insert the links into host map first so if any of them are invalid, we can remove return
+        // an error before updating imports
+        let mut links = Links::new();
+        for link in spec.links.into_iter() {
+            links.insert(link).context("Got invalid link")?;
+        }
+        self.links.write().await.insert(id.to_string(), links);
+
         // If the component is already running, update the links
         if let Some(component) = self.components.write().await.get(id) {
-            *component.handler.interface_links.write().await = component_import_links(&spec.links);
+            *component.handler.interface_links.write().await = import_links;
             // NOTE(brooksmtownsend): We can consider updating the component if the image URL changes
         };
-
-        // Insert the links into host map
-        self.links.write().await.insert(id.to_string(), spec.links);
 
         Ok(())
     }
@@ -3200,6 +3209,7 @@ impl Host {
         _value: impl AsRef<[u8]>,
         _publish: bool,
     ) -> anyhow::Result<()> {
+        // TODO(#whatever): delete links associated with component spec
         let id = id.as_ref();
         debug!(id, "process component delete");
         // TODO: TBD: stop component if spec deleted?
@@ -3264,6 +3274,31 @@ impl Host {
             }
         }
 
+        Ok(())
+    }
+
+    async fn process_link_put(
+        &self,
+        link: InterfaceLinkDefinition,
+        publish: bool,
+    ) -> anyhow::Result<()> {
+        //     let component_spec = self
+        //     .get_component_spec(&component_id)
+        //     .await?
+        //     .unwrap_or_else(|| ComponentSpecification::new(&component_ref));
+        // self.store_component_spec(&component_id, &component_spec)
+        //     .await?;
+        let mut lock = self.components.write().await;
+
+        Ok(())
+    }
+
+    async fn process_link_delete(
+        &self,
+        link: InterfaceLinkDefinition,
+        publish: bool,
+    ) -> anyhow::Result<()> {
+        // TODO: Remove from existing component spec map
         Ok(())
     }
 
@@ -3375,7 +3410,7 @@ fn component_import_links(
                     .iter()
                     .map(|interface| (interface.clone(), link.target.clone()))
                     .collect::<HashMap<String, String>>();
-                HashMap::from_iter([(ns_and_package.clone(), interfaces_map)])
+                HashMap::from([(ns_and_package.clone(), interfaces_map)])
             });
         acc
     })
