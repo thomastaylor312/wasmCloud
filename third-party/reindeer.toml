@@ -1,0 +1,10 @@
+fixup_templates = true
+
+[buck]
+buildscript_genrule = "buildscript_run"
+rust_library = "cargo.rust_library"
+rust_binary = "cargo.rust_binary"
+buckfile_imports = """
+load("@prelude//rust:cargo_buildscript.bzl", "buildscript_run")
+load("@prelude//rust:cargo_package.bzl", "cargo")
+"""
