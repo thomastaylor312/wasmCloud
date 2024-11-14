@@ -3609,6 +3609,42 @@ cargo.rust_library(
 )
 
 http_archive(
+    name = "cc-1.1.37.crate",
+    sha256 = "40545c26d092346d8a8dab71ee48e7685a7a9cba76e634790c215b41a4a7b4cf",
+    strip_prefix = "cc-1.1.37",
+    urls = ["https://static.crates.io/crates/cc/1.1.37/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "cc-1.1.37",
+    srcs = [":cc-1.1.37.crate"],
+    crate = "cc",
+    crate_root = "cc-1.1.37.crate/src/lib.rs",
+    edition = "2018",
+    features = ["parallel"],
+    platform = {
+        "linux-arm64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "linux-x86_64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "macos-arm64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "macos-x86_64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+    },
+    visibility = [],
+    deps = [
+        ":jobserver-0.1.32",
+        ":shlex-1.3.0",
+    ],
+)
+
+http_archive(
     name = "cfg-if-1.0.0.crate",
     sha256 = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd",
     strip_prefix = "cfg-if-1.0.0",
@@ -5207,6 +5243,9 @@ cargo.rust_library(
     crate = "curve25519_dalek",
     crate_root = "curve25519-dalek-4.1.3.crate/src/lib.rs",
     edition = "2021",
+    env = {
+        "OUT_DIR": "$(location :curve25519-dalek-4.1.3-build-script-run[out_dir])",
+    },
     features = [
         "digest",
         "zeroize",
@@ -5237,6 +5276,7 @@ cargo.rust_library(
             ],
         ),
     },
+    rustc_flags = ["@$(location :curve25519-dalek-4.1.3-build-script-run[rustc_flags])"],
     visibility = [],
     deps = [
         ":cfg-if-1.0.0",
@@ -5244,6 +5284,31 @@ cargo.rust_library(
         ":subtle-2.6.1",
         ":zeroize-1.8.1",
     ],
+)
+
+cargo.rust_binary(
+    name = "curve25519-dalek-4.1.3-build-script-build",
+    srcs = [":curve25519-dalek-4.1.3.crate"],
+    crate = "build_script_build",
+    crate_root = "curve25519-dalek-4.1.3.crate/build.rs",
+    edition = "2021",
+    features = [
+        "digest",
+        "zeroize",
+    ],
+    visibility = [],
+    deps = [":rustc_version-0.4.1"],
+)
+
+buildscript_run(
+    name = "curve25519-dalek-4.1.3-build-script-run",
+    package_name = "curve25519-dalek",
+    buildscript_rule = ":curve25519-dalek-4.1.3-build-script-build",
+    features = [
+        "digest",
+        "zeroize",
+    ],
+    version = "4.1.3",
 )
 
 http_archive(
@@ -9943,6 +10008,37 @@ cargo.rust_library(
     crate = "ittapi_sys",
     crate_root = "ittapi-sys-0.4.0.crate/src/lib.rs",
     edition = "2018",
+    visibility = [],
+)
+
+http_archive(
+    name = "jobserver-0.1.32.crate",
+    sha256 = "48d1dbcbbeb6a7fec7e059840aa538bd62aaccf972c7346c4d9d2059312853d0",
+    strip_prefix = "jobserver-0.1.32",
+    urls = ["https://static.crates.io/crates/jobserver/0.1.32/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "jobserver-0.1.32",
+    srcs = [":jobserver-0.1.32.crate"],
+    crate = "jobserver",
+    crate_root = "jobserver-0.1.32.crate/src/lib.rs",
+    edition = "2021",
+    platform = {
+        "linux-arm64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "linux-x86_64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "macos-arm64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+        "macos-x86_64": dict(
+            deps = [":libc-0.2.162"],
+        ),
+    },
     visibility = [],
 )
 
@@ -15010,6 +15106,18 @@ cargo.rust_library(
     crate = "ring",
     crate_root = "ring-0.17.8.crate/src/lib.rs",
     edition = "2021",
+    env = {
+        "CARGO_MANIFEST_DIR": "ring-0.17.8.crate",
+        "CARGO_PKG_AUTHORS": "Brian Smith <brian@briansmith.org>",
+        "CARGO_PKG_DESCRIPTION": "Safe, fast, small crypto using Rust.",
+        "CARGO_PKG_NAME": "ring",
+        "CARGO_PKG_REPOSITORY": "https://github.com/briansmith/ring",
+        "CARGO_PKG_VERSION": "0.17.8",
+        "CARGO_PKG_VERSION_MAJOR": "0",
+        "CARGO_PKG_VERSION_MINOR": "17",
+        "CARGO_PKG_VERSION_PATCH": "8",
+        "OUT_DIR": "$(location :ring-0.17.8-build-script-run[out_dir])",
+    },
     features = [
         "alloc",
         "default",
@@ -15038,12 +15146,55 @@ cargo.rust_library(
             deps = [":spin-0.9.8"],
         ),
     },
+    rustc_flags = ["@$(location :ring-0.17.8-build-script-run[rustc_flags])"],
     visibility = [],
     deps = [
         ":cfg-if-1.0.0",
         ":getrandom-0.2.15",
         ":untrusted-0.9.0",
     ],
+)
+
+cargo.rust_binary(
+    name = "ring-0.17.8-build-script-build",
+    srcs = [":ring-0.17.8.crate"],
+    crate = "build_script_build",
+    crate_root = "ring-0.17.8.crate/build.rs",
+    edition = "2021",
+    env = {
+        "CARGO_MANIFEST_DIR": "ring-0.17.8.crate",
+        "CARGO_PKG_AUTHORS": "Brian Smith <brian@briansmith.org>",
+        "CARGO_PKG_DESCRIPTION": "Safe, fast, small crypto using Rust.",
+        "CARGO_PKG_NAME": "ring",
+        "CARGO_PKG_REPOSITORY": "https://github.com/briansmith/ring",
+        "CARGO_PKG_VERSION": "0.17.8",
+        "CARGO_PKG_VERSION_MAJOR": "0",
+        "CARGO_PKG_VERSION_MINOR": "17",
+        "CARGO_PKG_VERSION_PATCH": "8",
+    },
+    features = [
+        "alloc",
+        "default",
+        "dev_urandom_fallback",
+    ],
+    visibility = [],
+    deps = [":cc-1.1.37"],
+)
+
+buildscript_run(
+    name = "ring-0.17.8-build-script-run",
+    package_name = "ring",
+    buildscript_rule = ":ring-0.17.8-build-script-build",
+    env = {
+        "CARGO_MANIFEST_LINKS": "ring_core_0_17_8",
+        "OPT_LEVEL": "z",
+    },
+    features = [
+        "alloc",
+        "default",
+        "dev_urandom_fallback",
+    ],
+    version = "0.17.8",
 )
 
 http_archive(
@@ -15274,6 +15425,24 @@ cargo.rust_library(
         "std",
     ],
     visibility = [],
+)
+
+http_archive(
+    name = "rustc_version-0.4.1.crate",
+    sha256 = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92",
+    strip_prefix = "rustc_version-0.4.1",
+    urls = ["https://static.crates.io/crates/rustc_version/0.4.1/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "rustc_version-0.4.1",
+    srcs = [":rustc_version-0.4.1.crate"],
+    crate = "rustc_version",
+    crate_root = "rustc_version-0.4.1.crate/src/lib.rs",
+    edition = "2018",
+    visibility = [],
+    deps = [":semver-1.0.23"],
 )
 
 http_archive(
@@ -17094,6 +17263,27 @@ cargo.rust_library(
     edition = "2015",
     visibility = [],
     deps = [":dirs-4.0.0"],
+)
+
+http_archive(
+    name = "shlex-1.3.0.crate",
+    sha256 = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64",
+    strip_prefix = "shlex-1.3.0",
+    urls = ["https://static.crates.io/crates/shlex/1.3.0/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "shlex-1.3.0",
+    srcs = [":shlex-1.3.0.crate"],
+    crate = "shlex",
+    crate_root = "shlex-1.3.0.crate/src/lib.rs",
+    edition = "2015",
+    features = [
+        "default",
+        "std",
+    ],
+    visibility = [],
 )
 
 http_archive(
@@ -20127,7 +20317,26 @@ cargo.rust_library(
     crate = "typenum",
     crate_root = "typenum-1.17.0.crate/src/lib.rs",
     edition = "2018",
+    env = {
+        "OUT_DIR": "$(location :typenum-1.17.0-build-script-main-run[out_dir])",
+    },
     visibility = [],
+)
+
+cargo.rust_binary(
+    name = "typenum-1.17.0-build-script-main",
+    srcs = [":typenum-1.17.0.crate"],
+    crate = "build_script_main",
+    crate_root = "typenum-1.17.0.crate/build/main.rs",
+    edition = "2018",
+    visibility = [],
+)
+
+buildscript_run(
+    name = "typenum-1.17.0-build-script-main-run",
+    package_name = "typenum",
+    buildscript_rule = ":typenum-1.17.0-build-script-main",
+    version = "1.17.0",
 )
 
 http_archive(
@@ -23850,6 +24059,7 @@ cargo.rust_library(
         "CARGO_PKG_VERSION_MAJOR": "0",
         "CARGO_PKG_VERSION_MINOR": "32",
         "CARGO_PKG_VERSION_PATCH": "0",
+        "DEBUG_OUTPUT_DIR": "/tmp",
         "OUT_DIR": "$(location :wit-bindgen-rust-macro-0.32.0-build-script-run[out_dir])",
     },
     proc_macro = True,
@@ -23882,6 +24092,7 @@ cargo.rust_binary(
         "CARGO_PKG_VERSION_MAJOR": "0",
         "CARGO_PKG_VERSION_MINOR": "32",
         "CARGO_PKG_VERSION_PATCH": "0",
+        "DEBUG_OUTPUT_DIR": "/tmp",
     },
     visibility = [],
 )

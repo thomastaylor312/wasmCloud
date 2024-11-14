@@ -7,7 +7,7 @@ features = []
 omit_features = []
 extra_deps = []
 omit_deps = []
-cargo_env = false
+cargo_env = true
 linker_flags = []
 
 [rustc_flags_select]
@@ -15,7 +15,10 @@ linker_flags = []
 [env]
 
 [[buildscript]]
-unresolved = "Unresolved build script at ../../../../.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/build.rs."
+[buildscript.rustc_flags]
+env = { "CARGO_MANIFEST_LINKS" = "ring_core_0_17_8", "OPT_LEVEL" = "z" }
+[[buildscript]]
+[buildscript.gen_srcs]
 
 [extra_mapped_srcs]
 

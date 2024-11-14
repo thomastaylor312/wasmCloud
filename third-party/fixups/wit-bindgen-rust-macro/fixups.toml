@@ -13,6 +13,8 @@ linker_flags = []
 [rustc_flags_select]
 
 [env]
+# This is a dumb thing because for some reason the build script remaps "OUT_DIR" to this var. But it is only used in a very specific circumstance.
+DEBUG_OUTPUT_DIR = "/tmp"
 
 [[buildscript]]
 [buildscript.rustc_flags]

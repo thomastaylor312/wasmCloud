@@ -1,0 +1,22 @@
+load("@prelude//rust:cargo_package.bzl", "cargo")
+
+cargo.rust_library(
+    name = "wascap",
+    srcs = glob(["src/**/*.rs"]),
+    crate = "wascap",
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    visibility = ["PUBLIC"],
+    deps = [
+        "//third-party:data-encoding",
+        "//third-party:humantime",
+        "//third-party:nkeys",
+        "//third-party:nuid",
+        "//third-party:ring",
+        "//third-party:serde",
+        "//third-party:serde_json",
+        "//third-party:wasm-encoder",
+        "//third-party:wasm-gen",
+        "//third-party:wasmparser"
+    ],
+)
