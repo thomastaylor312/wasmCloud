@@ -10076,8 +10076,7 @@ dependencies = [
 [[package]]
 name = "wrpc-transport"
 version = "0.28.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "806a107cd0b5a1315c381432c38db12497558a629dc13def7c50dac433ae48c8"
+source = "git+https://github.com/thomastaylor312/wrpc?branch=feat/more_flush#cfe3b838e8ce36e8ab78f7cde6222e8fd943ed4d"
 dependencies = [
  "anyhow",
  "bytes",
@@ -10095,8 +10094,7 @@ dependencies = [
 [[package]]
 name = "wrpc-transport-nats"
 version = "0.27.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a226edc7f6fd721b10260aa7fe083c71ccb29d464eb8f7121d634afc5e8c355b"
+source = "git+https://github.com/thomastaylor312/wrpc?branch=feat/more_flush#cfe3b838e8ce36e8ab78f7cde6222e8fd943ed4d"
 dependencies = [
  "anyhow",
  "async-nats",

@@ -383,3 +383,7 @@ wrpc-transport-nats = { version = "0.27.1", default-features = false, features =
 
 [package.metadata.cargo-machete]
 ignored = ["wasmcloud-provider-lattice-controller", "wasmcloud-provider-sdk"]
+
+[patch.crates-io]
+wrpc-transport-nats = { git = "https://github.com/thomastaylor312/wrpc", branch = "feat/more_flush" }
+wrpc-transport = { git = "https://github.com/thomastaylor312/wrpc", branch = "feat/more_flush" }
