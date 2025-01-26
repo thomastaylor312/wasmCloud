@@ -53,7 +53,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "version_check",
- "zerocopy 0.7.35",
+ "zerocopy",
 ]
 
 [[package]]
@@ -307,7 +307,7 @@ dependencies = [
  "futures",
  "memchr",
  "nkeys",
- "nuid 0.5.0",
+ "nuid",
  "once_cell",
  "portable-atomic",
  "rand 0.8.5",
@@ -2769,18 +2769,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "getrandom"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a49c392881ce6d5c3b8cb70f98717b7c07aabbdff06687b9030dbfbe2725f8"
-dependencies = [
- "cfg-if",
- "libc",
- "wasi 0.13.3+wasi-0.2.2",
- "windows-targets 0.52.6",
-]
-
-[[package]]
 name = "getset"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4120,16 +4108,6 @@ dependencies = [
 
 [[package]]
 name = "nuid"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b61b1710432e483e6a67b20b6c60c6afe0e2fad67aabba3bdb912f3f70ff6ae"
-dependencies = [
- "once_cell",
- "rand 0.9.0",
-]
-
-[[package]]
-name = "nuid"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc895af95856f929163a0aa20c26a78d26bfdc839f51b9d5aa7a5b79e52b7e83"
@@ -4904,7 +4882,7 @@ version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
- "zerocopy 0.7.35",
+ "zerocopy",
 ]
 
 [[package]]
@@ -5094,7 +5072,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tokio-tar",
- "wascap 0.15.3",
+ "wascap",
 ]
 
 [[package]]
@@ -5228,17 +5206,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rand"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3779b94aeb87e8bd4e834cee3650289ee9e0d5677f976ecdb6d219e5f4f6cd94"
-dependencies = [
- "rand_chacha 0.9.0",
- "rand_core 0.9.0",
- "zerocopy 0.8.14",
-]
-
-[[package]]
 name = "rand_chacha"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5259,16 +5226,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rand_chacha"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb"
-dependencies = [
- "ppv-lite86",
- "rand_core 0.9.0",
-]
-
-[[package]]
 name = "rand_core"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5284,16 +5241,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom 0.2.15",
-]
-
-[[package]]
-name = "rand_core"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b08f3c9802962f7e1b25113931d94f43ed9725bebc59db9d0c3e9a23b67e15ff"
-dependencies = [
- "getrandom 0.3.1",
- "zerocopy 0.8.14",
 ]
 
 [[package]]
@@ -5956,9 +5903,9 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
- "wascap 0.15.3",
+ "wascap",
  "wasmcloud-secrets-client",
- "wasmcloud-secrets-types 0.5.0",
+ "wasmcloud-secrets-types",
 ]
 
 [[package]]
@@ -6687,7 +6634,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "url",
- "wascap 0.15.3",
+ "wascap",
  "wasi-preview1-component-adapter-provider",
  "wit-component 0.219.1",
 ]
@@ -7364,7 +7311,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f294bff79170ed1c5633812aff1e565c35d993a36e757f9bc0accf5eec4e6045"
 dependencies = [
  "rand 0.8.5",
- "serde",
  "web-time",
 ]
 
@@ -7570,36 +7516,6 @@ name = "vsimd"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c3082ca00d5a5ef149bb8b555a72ae84c9c59f7250f013ac822ac2e49b19c64"
-
-[[package]]
-name = "wadm"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c45d770222dd201bfdefdda36581beb1d1ca17118df6e711adf611d33e37b065"
-dependencies = [
- "anyhow",
- "async-nats",
- "async-trait",
- "chrono",
- "cloudevents-sdk",
- "futures",
- "indexmap 2.7.1",
- "nkeys",
- "semver",
- "serde",
- "serde_json",
- "serde_yaml",
- "sha2",
- "thiserror 2.0.11",
- "tokio",
- "tracing",
- "tracing-futures",
- "ulid",
- "uuid 1.12.1",
- "wadm-types",
- "wasmcloud-control-interface 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmcloud-secrets-types 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "wadm-client"
@@ -7828,30 +7744,12 @@ dependencies = [
 
 [[package]]
 name = "wascap"
-version = "0.15.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b11a88ff74d38e894ff559c14a48f0d95d7732ba409afbee6ef18d3848803061"
-dependencies = [
- "data-encoding",
- "humantime",
- "nkeys",
- "nuid 0.4.1",
- "ring",
- "serde",
- "serde_json",
- "wasm-encoder 0.219.1",
- "wasm-gen",
- "wasmparser 0.219.1",
-]
-
-[[package]]
-name = "wascap"
 version = "0.15.3"
 dependencies = [
  "data-encoding",
  "humantime",
  "nkeys",
- "nuid 0.5.0",
+ "nuid",
  "ring",
  "serde",
  "serde_json",
@@ -7918,9 +7816,9 @@ dependencies = [
  "wash-lib",
  "wasm-pkg-client",
  "wasm-pkg-core",
- "wasmcloud-control-interface 2.3.0",
+ "wasmcloud-control-interface",
  "wasmcloud-core",
- "wasmcloud-secrets-types 0.5.0",
+ "wasmcloud-secrets-types",
  "wat",
  "which",
  "wit-bindgen-wrpc",
@@ -7987,12 +7885,12 @@ dependencies = [
  "wadm-client",
  "wadm-types",
  "walkdir",
- "wascap 0.15.3",
+ "wascap",
  "wasi-preview1-component-adapter-provider",
  "wasm-encoder 0.221.2",
  "wasm-pkg-client",
  "wasm-pkg-core",
- "wasmcloud-control-interface 2.3.0",
+ "wasmcloud-control-interface",
  "wasmcloud-core",
  "wasmcloud-test-util",
  "wasmparser 0.221.2",
@@ -8398,8 +8296,8 @@ dependencies = [
  "url",
  "uuid 1.12.1",
  "vaultrs",
- "wascap 0.15.3",
- "wasmcloud-control-interface 2.3.0",
+ "wascap",
+ "wasmcloud-control-interface",
  "wasmcloud-core",
  "wasmcloud-host",
  "wasmcloud-provider-blobstore-azure",
@@ -8454,26 +8352,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wasmcloud-control-interface"
-version = "2.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63d689ba5097cb8534e73953843343af4155548a1d3f768e75966b3e5f09f8e5"
-dependencies = [
- "anyhow",
- "async-nats",
- "cloudevents-sdk",
- "futures",
- "oci-client",
- "opentelemetry",
- "opentelemetry_sdk",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-opentelemetry",
-]
-
-[[package]]
 name = "wasmcloud-core"
 version = "0.16.0"
 dependencies = [
@@ -8495,7 +8373,7 @@ dependencies = [
  "tokio",
  "tracing",
  "url",
- "wascap 0.15.3",
+ "wascap",
  "webpki-roots",
 ]
 
@@ -8529,15 +8407,15 @@ dependencies = [
  "ulid",
  "url",
  "uuid 1.12.1",
- "wascap 0.15.3",
- "wasmcloud-control-interface 2.3.0",
+ "wascap",
+ "wasmcloud-control-interface",
  "wasmcloud-core",
  "wasmcloud-provider-http-server",
  "wasmcloud-provider-messaging-nats",
  "wasmcloud-provider-sdk",
  "wasmcloud-runtime",
  "wasmcloud-secrets-client",
- "wasmcloud-secrets-types 0.5.0",
+ "wasmcloud-secrets-types",
  "wasmcloud-tracing",
  "wasmtime-wasi-http",
  "wrpc-interface-http",
@@ -8679,7 +8557,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "wascap 0.15.3",
+ "wascap",
  "wasmcloud-provider-sdk",
  "wit-bindgen-wrpc",
 ]
@@ -8697,7 +8575,7 @@ dependencies = [
  "tracing",
  "url",
  "uuid 1.12.1",
- "wasmcloud-control-interface 2.3.0",
+ "wasmcloud-control-interface",
  "wasmcloud-provider-sdk",
  "wasmcloud-test-util",
  "wit-bindgen-wrpc",
@@ -8726,8 +8604,8 @@ dependencies = [
  "async-nats",
  "tokio",
  "tracing",
- "wascap 0.15.3",
- "wasmcloud-control-interface 2.3.0",
+ "wascap",
+ "wasmcloud-control-interface",
 ]
 
 [[package]]
@@ -8761,7 +8639,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-futures",
- "wascap 0.15.3",
+ "wascap",
  "wasmcloud-provider-sdk",
  "wit-bindgen-wrpc",
 ]
@@ -8838,10 +8716,9 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-opentelemetry",
- "wadm",
  "wadm-client",
  "wadm-types",
- "wascap 0.15.3",
+ "wascap",
  "wasmcloud-provider-sdk",
  "wit-bindgen-wrpc",
 ]
@@ -8865,7 +8742,7 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
- "wascap 0.15.3",
+ "wascap",
  "wasi-preview1-component-adapter-provider",
  "wasmcloud-component",
  "wasmcloud-core",
@@ -8889,7 +8766,7 @@ dependencies = [
  "nkeys",
  "serde_json",
  "thiserror 2.0.11",
- "wasmcloud-secrets-types 0.5.0",
+ "wasmcloud-secrets-types",
 ]
 
 [[package]]
@@ -8903,23 +8780,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.11",
- "wascap 0.15.3",
-]
-
-[[package]]
-name = "wasmcloud-secrets-types"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ee8358ba91cf74b60d0de37e0c33031b6059e4aa173e0d4bd14950a776d67ed"
-dependencies = [
- "anyhow",
- "async-trait",
- "bytes",
- "nkeys",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "wascap 0.15.2",
+ "wascap",
 ]
 
 [[package]]
@@ -8938,11 +8799,11 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "url",
- "wascap 0.15.3",
- "wasmcloud-control-interface 2.3.0",
+ "wascap",
+ "wasmcloud-control-interface",
  "wasmcloud-core",
  "wasmcloud-host",
- "wasmcloud-secrets-types 0.5.0",
+ "wasmcloud-secrets-types",
 ]
 
 [[package]]
@@ -10108,7 +9969,7 @@ dependencies = [
  "async-nats",
  "bytes",
  "futures",
- "nuid 0.5.0",
+ "nuid",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -10260,16 +10121,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
 dependencies = [
  "byteorder 1.5.0",
- "zerocopy-derive 0.7.35",
-]
-
-[[package]]
-name = "zerocopy"
-version = "0.8.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a367f292d93d4eab890745e75a778da40909cab4d6ff8173693812f79c4a2468"
-dependencies = [
- "zerocopy-derive 0.8.14",
+ "zerocopy-derive",
 ]
 
 [[package]]
@@ -10277,17 +10129,6 @@ name = "zerocopy-derive"
 version = "0.7.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.96",
-]
-
-[[package]]
-name = "zerocopy-derive"
-version = "0.8.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3931cb58c62c13adec22e38686b559c86a30565e16ad6e8510a337cedc611e1"
 dependencies = [
  "proc-macro2",
  "quote",
