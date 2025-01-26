@@ -8842,7 +8842,6 @@ dependencies = [
  "wadm-client",
  "wadm-types",
  "wascap 0.15.3",
- "wash-lib",
  "wasmcloud-provider-sdk",
  "wit-bindgen-wrpc",
 ]
